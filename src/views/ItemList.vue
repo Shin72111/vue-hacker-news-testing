@@ -6,18 +6,29 @@
 
 <script>
 import Item from '../components/Item.vue'
-
-// Warning: @vue/test-utils should use version 1.0.0-beta.20. To install, use:
-// npm install --save-dev @vue/test-utils@1.0.0-beta.20
-//
+import { fetchListData } from '../api/api'
 
 export default {
   components: {
     Item
   },
+  beforeMount () {
+    this.loadItems()
+  },
   data () {
     return {
-      displayItems: window.items
+      displayItems: []
+    }
+  },
+  methods: {
+    loadItems () {
+      this.$bar.start()
+      fetchListData('top')
+        .then(items => {
+          this.displayItems = items
+          this.$bar.finish()
+        })
+        .catch(() => this.$bar.fail())
     }
   }
 }
