@@ -1,5 +1,5 @@
 <template>
-  <div :class="{hidden: hidden}" :style="{'width': `${percent}%`}"></div>
+  <div :class="{hidden: hidden, error: error}" :style="{'width': `${percent}%`}"></div>
 </template>
 
 <script>
@@ -7,7 +7,8 @@ export default {
   data () {
     return {
       hidden: true,
-      percent: 0
+      percent: 0,
+      error: false
     }
   },
   methods: {
@@ -22,6 +23,10 @@ export default {
       this.percent = 100
       this.hidden = true
       clearInterval(this.timer)
+    },
+    fail () {
+      this.error = true
+      this.percent = 100
     }
   }
 }
