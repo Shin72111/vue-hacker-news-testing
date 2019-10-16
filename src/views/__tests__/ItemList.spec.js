@@ -1,18 +1,23 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
+import mergewith from 'lodash.mergewith'
 import ItemList from '../ItemList.vue'
 import Item from '../../components/Item.vue'
 import flushPromises from 'flush-promises'
+
+const customizer = (objValue, srcValue) => {
+  if (Array.isArray(srcValue))
+    return srcValue
+  if (srcValue instanceof Object && Object.keys(srcValue).length === 0)
+    return srcValue
+}
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
 
 describe('ItemList.vue', () => {
-  let storeOptions
-  let store
-
-  beforeEach(() => {
-    storeOptions = {
+  const createStore = (overrides) => {
+    const defaultStoreConfig = {
       getters: {
         displayItems: jest.fn()
       },
@@ -20,22 +25,41 @@ describe('ItemList.vue', () => {
         fetchListData: jest.fn(() => Promise.resolve())
       }
     }
+    return new Vuex.Store(
+      mergewith(defaultStoreConfig, overrides, customizer)
+    )
+  }
 
-    store = new Vuex.Store(storeOptions)
-  })
+  const createWrapper = overrides => {
+    const defaultMountingOptions = {
+      mocks: {
+        $bar: {
+          start: jest.fn(),
+          finish: jest.fn(),
+          fail: jest.fn()
+        }
+      },
+      localVue,
+      store: createStore()
+    }
+    return shallowMount(
+      ItemList,
+      mergewith(
+        defaultMountingOptions,
+        overrides,
+        customizer
+      )  
+    )
+  }
 
   test('renders an Item with data for each item in displayItems', () => {
-    const $bar = {
-      start: () => {},
-      finish: () => {}
-    }
     const items = [{ id: 1 }, { id: 2 }, { id: 3 }]
-    storeOptions.getters.displayItems.mockReturnValue(items)
-    const wrapper = shallowMount(ItemList, {
-      mocks: { $bar },
-      localVue,
-      store
+    const store = createStore({
+      getters: {
+        displayItems: () => items
+      }
     })
+    const wrapper = createWrapper({ store })
     const Items = wrapper.findAll(Item)
     expect(Items).toHaveLength(items.length)
     Items.wrappers.forEach((wrapper, i) => {
@@ -43,26 +67,22 @@ describe('ItemList.vue', () => {
     })
   })
 
-  test('call $bar start on load', () => {
+  test('call $bar start on render', () => {
     const $bar = {
       start: jest.fn(),
-      finish: () => {}
     }
-    shallowMount(ItemList, {
+    createWrapper({
       mocks: { $bar },
-      localVue,
-      store
     })
     expect($bar.start).toHaveBeenCalledTimes(1)
   })
 
-  test('calls $bar.finish when load is successful', async () => {
+  test('calls $bar.finish when load successful', async () => {
     expect.assertions(1)
     const $bar = {
-      start: () => {},
       finish: jest.fn()
     }
-    shallowMount(ItemList, { mocks: { $bar }, localVue, store })
+    createWrapper({ mocks: { $bar }})
     await flushPromises()
 
     expect($bar.finish).toHaveBeenCalled()
@@ -70,25 +90,28 @@ describe('ItemList.vue', () => {
 
   test('calls $bar.fail when fetchListData throws', async () => {
     expect.assertions(1)
-    const $bar = {
-      start: () => {},
-      fail: jest.fn()
+    const store = createStore({
+      actions: {
+        fetchListData: jest.fn(() => Promise.reject())
+      }
+    })
+    const mocks = {
+      $bar: {
+        fail: jest.fn()
+      }
     }
-    storeOptions.actions.fetchListData.mockRejectedValue()
-    shallowMount(ItemList, { mocks: { $bar }, localVue, store })
+    createWrapper({ mocks, store })
     await flushPromises()
 
-    expect($bar.fail).toHaveBeenCalled()
+    expect(mocks.$bar.fail).toHaveBeenCalled()
   })
 
   test('dispatch fetchListData with top', async () => {
     expect.assertions(1)
-    const $bar = {
-      start: () => {},
-      finish: () => {}
-    }
+    const store = createStore()
     store.dispatch = jest.fn(() => Promise.resolve())
-    shallowMount(ItemList, { mocks: { $bar }, localVue, store })
+    createWrapper({ store })
+    await flushPromises()
     expect(store.dispatch).toHaveBeenCalledWith('fetchListData', {
       type: 'top'
     })
