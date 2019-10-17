@@ -1,4 +1,7 @@
 import Vuex from 'vuex'
+import VueRouter from 'vue-router'
+import { sync } from 'vuex-router-sync'
+import routerConfig from '../../router/router-config'
 import { createLocalVue } from '@vue/test-utils'
 import cloneDeep from 'lodash.clonedeep'
 import flushPromises from 'flush-promises'
@@ -9,6 +12,10 @@ jest.mock('../../api/api')
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
+localVue.use(VueRouter)
+const store = new Vuex.Store(storeConfig)
+const router = new VueRouter(routerConfig)
+sync(store, router)
 
 const createItems = () => {
   const arr = new Array(22)
