@@ -28,4 +28,30 @@ describe('Item.vue', () => {
     expect(a.text()).toBe(item.title)
     expect(a.attributes().href).toBe(item.url)
   })
+
+  test('renders the time since the last post', () => {
+    const dateNow = jest.spyOn(Date, 'now')
+    const dateNowTime = new Date('2019')
+
+    dateNow.mockImplementation(() => dateNowTime)
+
+    const item = {
+      time: (dateNowTime / 1000) - 600
+    }
+    const wrapper = shallowMount(Item, {
+      propsData: { item }
+    })
+    dateNow.mockRestore()
+    expect(wrapper.text()).toContain('10 minutes ago')
+  })
+
+  test('renders the hostname', () => {
+    const item = {
+      url: 'https://some-url.com/with-paths'
+    }
+    const wrapper = shallowMount(Item, {
+      propsData: { item }
+    })
+    expect(wrapper.text()).toContain('(some-url.com)')
+  })
 })

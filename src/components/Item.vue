@@ -1,9 +1,10 @@
 <template>
   <li>
     <a :href="item.url">{{ item.title }}</a>
-    {{ item.url }}
+    <span class="host"> ({{ item.url | host }})</span>
     {{ item.author }}
     {{ item.score }}
+    {{ item.time | timeAgo }} ago
   </li>
 </template>
 

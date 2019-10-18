@@ -7,6 +7,7 @@ import ProgressBar from './components/ProgressBar'
 import storeConfig from './store/store-config'
 import routerConfig from './router/router-config'
 import { titleMixin } from './util/mixins'
+import { host, timeAgo } from './util/filters'
 
 Vue.use(Vuex)
 Vue.use(VueRouter)
@@ -16,6 +17,9 @@ const router = new VueRouter(routerConfig)
 sync(store, router)
 
 Vue.mixin(titleMixin)
+
+Vue.filter('timeAgo', timeAgo)
+Vue.filter('host', host)
 
 Vue.config.productionTip = false
 
