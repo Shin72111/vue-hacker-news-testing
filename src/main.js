@@ -6,6 +6,7 @@ import App from './App'
 import ProgressBar from './components/ProgressBar'
 import storeConfig from './store/store-config'
 import routerConfig from './router/router-config'
+import { titleMixin } from './util/mixins'
 
 Vue.use(Vuex)
 Vue.use(VueRouter)
@@ -13,6 +14,8 @@ Vue.use(VueRouter)
 const store = new Vuex.Store(storeConfig)
 const router = new VueRouter(routerConfig)
 sync(store, router)
+
+Vue.mixin(titleMixin)
 
 Vue.config.productionTip = false
 
