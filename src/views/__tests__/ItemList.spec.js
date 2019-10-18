@@ -4,7 +4,6 @@ import mergewith from 'lodash.mergewith'
 import ItemList from '../ItemList.vue'
 import Item from '../../components/Item.vue'
 import flushPromises from 'flush-promises'
-import { async } from 'q'
 
 const customizer = (objValue, srcValue) => {
   if (Array.isArray(srcValue))
@@ -241,5 +240,14 @@ describe('ItemList.vue', () => {
     const wrapper = createWrapper({ store })
     expect(wrapper.findAll('a').at(1).attributes().href).toBe(undefined)
     expect(wrapper.findAll('a').at(1).text()).toBe('more >')
+  })
+
+  test('sets document.title with the capitalized type prop', () => {
+    createWrapper({
+      mocks: {
+        $route: { params: { type: 'top' } }
+      }
+    })
+    expect(document.title).toBe('Vue HN | Top')
   })
 })

@@ -22,6 +22,11 @@
 
 <script>
 import Item from '../components/Item.vue'
+import { titleMixin } from '../util/mixins'
+
+const capitalizeFirstLetter = string => {
+  return string.charAt(0).toUpperCase() + string.slice(1)
+}
 
 export default {
   components: {
@@ -45,6 +50,10 @@ export default {
         })
         .catch(() => this.$bar.fail())
     }
-  }
+  },
+  title () {
+    return capitalizeFirstLetter(this.$route.params.type)
+  },
+  mixins: [titleMixin]
 }
 </script>
