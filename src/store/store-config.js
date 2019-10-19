@@ -1,14 +1,17 @@
-import getters from './getters'
-import mutations from './mutations'
 import actions from './actions'
+import mutations from './mutations'
+import getters from './getters'
 
 const state = {
-  items: []
+  item: null,
+  items: [],
+  comments: {},
+  user: null
 }
 
 export default {
   state,
   getters,
-  mutations,
-  actions
+  actions,
+  mutations
 }

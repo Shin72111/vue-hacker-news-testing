@@ -183,6 +183,40 @@ describe('ItemList.vue', () => {
     expect(mocks.$router.replace).toHaveBeenCalledWith('/top/1')
   })
 
+  test('calls $router.replace when the page parameter is 0', async () => {
+    expect.assertions(1)
+    const mocks = {
+      $route: {
+        params: {
+          page: '0'
+        }
+      },
+      $router: {
+        replace: jest.fn()
+      }
+    }
+    createWrapper({ mocks })
+    await flushPromises()
+    expect(mocks.$router.replace).toHaveBeenCalledWith('/top/1')
+  })
+
+  test('calls $router.replace when the page parameter is not a number', async () => {
+    expect.assertions(1)
+    const mocks = {
+      $route: {
+        params: {
+          page: 'abc'
+        }
+      },
+      $router: {
+        replace: jest.fn()
+      }
+    }
+    createWrapper({ mocks })
+    await flushPromises()
+    expect(mocks.$router.replace).toHaveBeenCalledWith('/top/1')
+  })
+
   test('renders a RouterLink with the previous page if one exists', () => {
     const mocks = {
       $route: {

@@ -1,29 +1,70 @@
+import {
+  shallowMount,
+  RouterLinkStub
+} from '@vue/test-utils'
 import Item from '../Item.vue'
-import { shallowMount } from '@vue/test-utils'
+import merge from 'lodash.merge'
+
+function createWrapper (overrides) {
+  const defaultMountingOptions = {
+    stubs: {
+      RouterLink: RouterLinkStub
+    },
+    propsData: {
+      item: {}
+    }
+  }
+  return shallowMount(Item, merge(defaultMountingOptions, overrides))
+}
 
 describe('Item.vue', () => {
-  test('render item.author and item.score', () => {
+  test('renders the hostname', () => {
     const item = {
-      author: 'Tester',
-      score: 999
+      url: 'https://some-url.com/with-paths'
     }
-    const wrapper = shallowMount(Item, {
-      propsData: { item }
-    })
 
-    expect(wrapper.text()).toContain(item.author)
+    const wrapper = createWrapper({
+      propsData: {
+        item
+      }
+    })
+    expect(wrapper.text()).toContain('(some-url.com)')
+  })
+
+  test('renders item.score', () => {
+    const item = {
+      score: 10
+    }
+    const wrapper = createWrapper({
+      propsData: {
+        item
+      }
+    })
     expect(wrapper.text()).toContain(item.score)
+  })
+
+  test('renders item.by', () => {
+    const item = {
+      by: 'some author'
+    }
+    const wrapper = createWrapper({
+      propsData: {
+        item
+      }
+    })
+    expect(wrapper.text()).toContain(item.by)
   })
 
   test('renders a link to the item.url with item.title as text', () => {
     const item = {
-      title: 'some title',
-      url: 'http://some-url.com'
+      url: 'http://some-url.com',
+      title: 'some-title'
     }
-    const wrapper = shallowMount(Item, {
-      propsData: { item }
+    const wrapper = createWrapper({
+      propsData: {
+        item
+      }
     })
-
     const a = wrapper.find('a')
     expect(a.text()).toBe(item.title)
     expect(a.attributes().href).toBe(item.url)
@@ -38,20 +79,55 @@ describe('Item.vue', () => {
     const item = {
       time: (dateNowTime / 1000) - 600
     }
-    const wrapper = shallowMount(Item, {
-      propsData: { item }
+    const wrapper = createWrapper({
+      propsData: {
+        item
+      }
     })
     dateNow.mockRestore()
     expect(wrapper.text()).toContain('10 minutes ago')
   })
 
-  test('renders the hostname', () => {
+  test('renders correctly', () => {
+    const dateNow = jest.spyOn(Date, 'now')
+    const dateNowTime = new Date('2019')
+
+    dateNow.mockImplementation(() => dateNowTime)
+
     const item = {
-      url: 'https://some-url.com/with-paths'
+      by: 'tamtran(shin72111)',
+      id: 11122233,
+      score: 10,
+      time: (dateNowTime / 1000) - 600,
+      title: 'vue-test-utils is released',
+      type: 'story',
+      url: 'https://vue-test-utils.vuejs.org/'
     }
-    const wrapper = shallowMount(Item, {
+    const wrapper = createWrapper({
       propsData: { item }
     })
-    expect(wrapper.text()).toContain('(some-url.com)')
+    dateNow.mockRestore()
+    expect(wrapper.element).toMatchSnapshot()
+  })
+
+  test('renders correctly as job', () => {
+    const dateNow = jest.spyOn(Date, 'now')
+    const dateNowTime = new Date('2019')
+    
+    dateNow.mockImplementation(() => dateNowTime)
+
+    const item = {
+      by: 'tamtran(shin72111)',
+      id: 11122233,
+      score: 10,
+      time: (dateNowTime / 1000) - 600,
+      title: 'vue-test-utils is released',
+      type: 'job'
+    }
+    const wrapper = createWrapper({
+      propsData: { item }
+    })
+    dateNow.mockRestore()
+    expect(wrapper.element).toMatchSnapshot()
   })
 })
